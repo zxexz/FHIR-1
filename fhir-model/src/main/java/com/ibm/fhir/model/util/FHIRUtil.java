@@ -125,7 +125,7 @@ public class FHIRUtil {
         sb.append(Arrays.asList(ResourceType.ValueSet.values()).stream()
             .map(v -> v.value())
             .collect(Collectors.joining("|")));
-        sb.append(")\\/[A-Za-z0-9\\-\\.]{1,64}(\\/_history\\/[A-Za-z0-9\\-\\.]{1,64})?");
+        sb.append(")\\/([A-Za-z0-9\\-\\.]{1,64})(\\/_history\\/[A-Za-z0-9\\-\\.]{1,64})?");
         return Pattern.compile(sb.toString());
     }
 
