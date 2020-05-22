@@ -17,6 +17,10 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ibm.fhir.config.FHIRConfigHelper;
+import com.ibm.fhir.config.FHIRConfiguration;
+import com.ibm.fhir.config.FHIRRequestContext;
+import com.ibm.fhir.config.PropertyGroup;
 import com.ibm.fhir.database.utils.api.ITransactionProvider;
 import com.ibm.fhir.database.utils.common.JdbcConnectionProvider;
 import com.ibm.fhir.database.utils.common.JdbcPropertyAdapter;
@@ -298,6 +302,9 @@ public class Main {
      * @throws Exception
      */
     protected void processDB2() throws Exception {
+    	
+    	// Note: The JDBC persistence layer now uses FHIRConfiguration to find the tenantKey
+    	// The default location is based on the current working directory, which is fine.
 
         // Set up a connection provider pointing to the DB2 instance described
         // by the configProps
@@ -312,6 +319,11 @@ public class Main {
         if (this.tenantName == null || tenantKey == null) {
             throw new IllegalArgumentException("Either tenant-key or tenant-name was not provided");
         }
+
+        // make sure the correct tenant key exists in tenant's fhir-server-config.json
+        FHIRRequestContext context = new FHIRRequestContext(this.tenantName);
+        FHIRRequestContext.set(context);
+        checkTenantKeyInConfig();
 
         long start = System.nanoTime();
         DriverMetrics dm = new DriverMetrics();
@@ -343,6 +355,33 @@ public class Main {
 
         long elapsed = (System.nanoTime() - start) / DriverMetrics.NANOS_MS;
         renderReport(dm, elapsed);
+    }
+
+    /**
+     * Perform a simple check to make sure that the required tenantKey has been
+     * configured properly in the tenant's fhir-server-config.json file. The value
+     * must match the tenantKey argument passed on the CLI. This is a workaround
+     * until we update the FHIR configuration to permit injection of configuration
+     * elements which will help to support testing scenarios such as this.
+     */
+    private void checkTenantKeyInConfig() {
+        String dsPropertyName = FHIRConfiguration.PROPERTY_DATASOURCES + "/" + this.tenantName;
+        PropertyGroup dsPG = FHIRConfigHelper.getPropertyGroup(dsPropertyName);
+        if (dsPG != null) {
+        	try {
+        		String propValue = dsPG.getStringProperty("tenantKey", null);
+	            if (propValue == null) {
+	            	throw new IllegalStateException("tenantKey not configured in fhir-server-config for tenant '"
+	            			+ this.tenantName + "'");
+	            }
+	            else if (!propValue.equals(this.tenantKey)) {
+	            	throw new IllegalStateException("tenantKey in fhir-server-config does not match arg");
+	            }
+        	}
+        	catch (Exception x) {
+        		throw new IllegalStateException("Failed getting string property for tenantKey", x);
+        	}
+        }
     }
 
     /**

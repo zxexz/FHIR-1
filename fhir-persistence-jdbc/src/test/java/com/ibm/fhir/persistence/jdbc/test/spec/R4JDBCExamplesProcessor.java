@@ -111,6 +111,10 @@ public class R4JDBCExamplesProcessor implements IExampleProcessor {
 
         // The sequence of operations we want to apply to each resource
         this.operations.addAll(operations);
+        
+        // Initialize the PropertyGroup needed to pass the tenant-key configuration
+        // into @see FHIRDbDAOImpl
+        
     }
 
     @Override
@@ -126,7 +130,10 @@ public class R4JDBCExamplesProcessor implements IExampleProcessor {
             if (this.tenantName != null && this.tenantKey != null) {
                 FHIRRequestContext rc = FHIRRequestContext.get();
                 rc.setTenantId(this.tenantName);
-                rc.setTenantKey(this.tenantKey);
+                
+                // the tenant-key is no longer set on the context, instead, it is
+                // obtained from the datasource PropertyGroup, which must be set up
+                // in advance.
             }
 
             tmpPersistence = new FHIRPersistenceJDBCImpl(this.configProps, this.cp);

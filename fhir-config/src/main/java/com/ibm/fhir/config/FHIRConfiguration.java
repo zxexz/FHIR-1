@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.json.JsonObject;
+
 /**
  * This class serves up a singleton instance of ConfigurationService containing the FHIR Server's configuration.
  */
@@ -111,16 +113,20 @@ public class FHIRConfiguration {
     // Optional "home directory" for config files.  Defaults to current directory.
     private static String configHome = "";
 
+    // singleton instance of this class
     private static FHIRConfiguration _instance = new FHIRConfiguration();
 
+    // This is our in-memory cache of PropertyGroup's keyed by tenant-id.
+    private TenantSpecificPropertyGroupCache configCache = new TenantSpecificPropertyGroupCache();
+
+    /**
+     * Getter for the {@link FHIRConfiguration} singleton
+     * @return
+     */
     public static FHIRConfiguration getInstance() {
         return _instance;
     }
 
-    /**
-     * This is our in-memory cache of PropertyGroup's keyed by tenant-id.
-     */
-    private TenantSpecificPropertyGroupCache configCache = new TenantSpecificPropertyGroupCache();
 
     /**
      * This method is used to configure an explicit top-level directory where FHIR Server configuration
