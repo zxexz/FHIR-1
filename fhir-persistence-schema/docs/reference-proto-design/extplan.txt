@@ -1,0 +1,163 @@
+DB2 Universal Database Version 11.5, 5622-044 (c) Copyright IBM Corp. 1991, 2017
+Licensed Material - Program Property of IBM
+IBM DB2 Universal Database SQL and XQUERY Explain Tool
+
+******************** SETUP SCRIPT **********************************
+
+  SET CURRENT SCHEMA proto
+
+Statement successful.
+
+
+******************** DYNAMIC ***************************************
+
+==================== STATEMENT ==========================================
+
+        Isolation Level          = Cursor Stability
+        Blocking                 = Block Unambiguous Cursors
+        Query Optimization Class = 5
+
+        Partition Parallel       = No
+        Intra-Partition Parallel = No
+
+        SQL Path                 = "SYSIBM", "SYSFUN", "SYSPROC", "SYSIBMADM",
+                                   "DB2INST1"
+
+
+Statement:
+
+  SELECT lr.logical_id AS observation
+  FROM external_systems xs JOIN external_references xr ON
+          xs.external_system_name =
+          'http://fhir.system1.com/fhir-server/api/v4/Patient/' AND
+          xr.external_system_id =xs.external_system_id AND
+          xr.external_reference_value ='42-douglas' AND
+          xr.parameter_name_id =3 JOIN logical_resources lr ON
+          lr.logical_resource_id =xr.logical_resource_id
+
+
+Section Code Page = 1208
+
+Estimated Cost = 14.157627
+Estimated Cardinality = 0.500000
+
+Access Table Name = PROTO.EXTERNAL_SYSTEMS  ID = 4,1637
+|  Index Scan:  Name = PROTO.UNQ_EXTERNAL_SYSTEM_NM  ID = 2
+|  |  Regular Index (Not Clustered)
+|  |  Index Columns:
+|  |  |  1: EXTERNAL_SYSTEM_NAME (Ascending)
+|  #Columns = 1
+|  Single Record
+|  Fully Qualified Unique Key
+|  Skip Inserted Rows
+|  Avoid Locking Committed Data
+|  Currently Committed for Cursor Stability
+|  Evaluate Predicates Before Locking for Key
+|  #Key Columns = 1
+|  |  Start Key: Inclusive Value
+|  |  |  1: 'http://fhir.system1....'
+|  |  Stop Key: Inclusive Value
+|  |  |  1: 'http://fhir.system1....'
+|  Data Prefetch: None
+|  Index Prefetch: None
+|  Lock Intents
+|  |  Table: Intent Share
+|  |  Row  : Next Key Share
+Nested Loop Join
+|  Piped Inner
+|  Access Table Name = PROTO.EXTERNAL_REFERENCES  ID = 4,1638
+|  |  Index Scan:  Name = PROTO.UNQ_EXTERNAL_REFERENCES_PRSR  ID = 2
+|  |  |  Regular Index (Not Clustered)
+|  |  |  Index Columns:
+|  |  |  |  1: EXTERNAL_REFERENCE_VALUE (Ascending)
+|  |  |  |  2: PARAMETER_NAME_ID (Ascending)
+|  |  |  |  3: EXTERNAL_SYSTEM_ID (Ascending)
+|  |  |  |  4: LOGICAL_RESOURCE_ID (Ascending)
+|  |  #Columns = 2
+|  |  Skip Inserted Rows
+|  |  Avoid Locking Committed Data
+|  |  Currently Committed for Cursor Stability
+|  |  #Key Columns = 2
+|  |  |  Start Key: Inclusive Value
+|  |  |  |  1: '42-douglas'
+|  |  |  |  2: 3
+|  |  |  Stop Key: Inclusive Value
+|  |  |  |  1: '42-douglas'
+|  |  |  |  2: 3
+|  |  Index-Only Access
+|  |  Index Prefetch: None
+|  |  Lock Intents
+|  |  |  Table: Intent Share
+|  |  |  Row  : Next Key Share
+|  Nested Loop Join
+|  |  Access Table Name = PROTO.LOGICAL_RESOURCES  ID = 4,1635
+|  |  |  Index Scan:  Name = PROTO.PK_LOGICAL_RESOURCE  ID = 1
+|  |  |  |  Regular Index (Not Clustered)
+|  |  |  |  Index Columns:
+|  |  |  |  |  1: LOGICAL_RESOURCE_ID (Ascending)
+|  |  |  #Columns = 1
+|  |  |  Single Record
+|  |  |  Fully Qualified Unique Key
+|  |  |  Skip Inserted Rows
+|  |  |  Avoid Locking Committed Data
+|  |  |  Currently Committed for Cursor Stability
+|  |  |  Evaluate Predicates Before Locking for Key
+|  |  |  #Key Columns = 1
+|  |  |  |  Start Key: Inclusive Value
+|  |  |  |  |  1: ?
+|  |  |  |  Stop Key: Inclusive Value
+|  |  |  |  |  1: ?
+|  |  |  Data Prefetch: None
+|  |  |  Index Prefetch: None
+|  |  |  Lock Intents
+|  |  |  |  Table: Intent Share
+|  |  |  |  Row  : Next Key Share
+|  Residual Predicate(s)
+|  |  #Predicates = 1
+Return Data to Application
+|  #Columns = 1
+
+End of section
+
+
+Optimizer Plan:
+
+                                           Rows
+                                         Operator
+                                           (ID)
+                                           Cost
+
+                                           0.5
+                                         RETURN
+                                          ( 1)
+                                         14.1576
+                                           |
+                                           0.5
+                                         NLJOIN
+                                          ( 2)
+                                         14.1576
+                            /-----------/       \-----------\
+                        1                                      0.5
+                      FETCH                                  FILTER
+                      ( 3)                                    ( 5)
+                     7.06925                                 7.08838
+                 /--/       \                                  |
+            1                   2                               1
+         IXSCAN          Table:                              NLJOIN
+          ( 4)           PROTO                                ( 6)
+        0.0177703        EXTERNAL_SYSTEMS                    7.08819
+           |                                        /-------/       \--------------\
+           2                                   1                                    *
+ Index:                                     IXSCAN                           /-----/ \
+ PROTO                                       ( 7)                       1                   7
+ UNQ_EXTERNAL_SYSTEM_NM                    0.0185223                 IXSCAN         Table:
+                                              |                       ( 9)          PROTO
+                                              2                     0.0181898       LOGICAL_RESOURCES
+                                 Index:                                |
+                                 PROTO                                  7
+                                 UNQ_EXTERNAL_REFERENCES_PRSR  Index:
+                                                               PROTO
+                                                               PK_LOGICAL_RESOURCE
+
+
+
