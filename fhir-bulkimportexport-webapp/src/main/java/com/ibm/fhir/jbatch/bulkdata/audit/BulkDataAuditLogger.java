@@ -15,11 +15,9 @@ import javax.ws.rs.core.Response;
 
 import com.ibm.fhir.audit.logging.api.AuditLogService;
 import com.ibm.fhir.audit.logging.api.AuditLogServiceFactory;
-import com.ibm.fhir.audit.logging.beans.ApiParameters;
 import com.ibm.fhir.audit.logging.beans.AuditLogEntry;
 import com.ibm.fhir.audit.logging.beans.AuditLogEventType;
 import com.ibm.fhir.audit.logging.beans.Batch;
-import com.ibm.fhir.audit.logging.beans.Context;
 import com.ibm.fhir.audit.logging.beans.Data;
 import com.ibm.fhir.config.FHIRConfigHelper;
 import com.ibm.fhir.config.FHIRConfiguration;
@@ -187,14 +185,15 @@ public class BulkDataAuditLogger {
         String patientIdExtUrl;
         List<String> userList = new ArrayList<>();
 
-        entry.setLocation(new StringBuilder().append(request.getRemoteAddr()).append("/").append(request.getRemoteHost()).toString());
-        entry.setContext(new Context());
-        requestUrl = request.getRequestURL();
-        if (request.getQueryString() != null) {
-            requestUrl.append("?");
-            requestUrl.append(request.getQueryString());
-        }
-        entry.getContext().setApiParameters(ApiParameters.builder().request(requestUrl.toString()).status(responseStatus.getStatusCode()).build());
+
+//        entry.setLocation(new StringBuilder().append(request.getRemoteAddr()).append("/").append(request.getRemoteHost()).toString());
+//        entry.setContext(new Context());
+//        requestUrl = request.getRequestURL();
+//        if (request.getQueryString() != null) {
+//            requestUrl.append("?");
+//            requestUrl.append(request.getQueryString());
+//        }
+        //entry.getContext().setApiParameters(ApiParameters.builder().request(requestUrl.toString()).status(responseStatus.getStatusCode()).build());
         entry.getContext().setStartTime(FHIRUtilities.formatTimestamp(startTime));
         entry.getContext().setEndTime(FHIRUtilities.formatTimestamp(endTime));
         if (resource != null) {
@@ -209,9 +208,9 @@ public class BulkDataAuditLogger {
 
         // Get Client Cert CN as on Behalf of
         // Get Client Cert Issuer OU as on behalf ofc
-        entry.setClientCertCn(request.getHeader(HEADER_CLIENT_CERT_CN));
-        entry.setClientCertIssuerOu(request.getHeader(HEADER_CLIENT_CERT_ISSUER_OU));
-        entry.setCorrelationId(request.getHeader(HEADER_CORRELATION_ID));
+//        entry.setClientCertCn(request.getHeader(HEADER_CLIENT_CERT_CN));
+//        entry.setClientCertIssuerOu(request.getHeader(HEADER_CLIENT_CERT_ISSUER_OU));
+//        entry.setCorrelationId(request.getHeader(HEADER_CORRELATION_ID));
 
         patientIdExtUrl = FHIRConfigHelper.getStringProperty(FHIRConfiguration.PROPERTY_AUDIT_PATIENT_ID_EXTURL, null);
         entry.setPatientId(FHIRUtil.getExtensionStringValue(resource, patientIdExtUrl));

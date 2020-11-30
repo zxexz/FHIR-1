@@ -14,21 +14,21 @@ import java.io.IOException;
 
 import org.testng.annotations.Test;
 
-import com.ibm.fhir.audit.logging.api.impl.kafka.EventStreamsCredentials;
 import com.ibm.fhir.audit.logging.api.impl.kafka.environment.IBMEventStreams;
+import com.ibm.fhir.audit.logging.api.impl.kafka.environment.IBMEventStreams.EventStreamsCredentials;
 import com.ibm.fhir.exception.FHIRException;
 
 public class EnvironmentTest {
 
     @Test
     public void testEnvironment() throws FHIRException, IOException {
-        IBMEventStreams e = new IBMEventStreams(); 
-        assertNotNull(e); 
-        
+        IBMEventStreams e = new IBMEventStreams();
+        assertNotNull(e);
+
         String[] kafkaBrokerSasls = new String[1];
         kafkaBrokerSasls[0] = "test";
 
-        EventStreamsCredentials esc =
+        com.ibm.fhir.audit.logging.api.impl.kafka.environment.IBMEventStreams.EventStreamsCredentials esc =
                 EventStreamsCredentials.builder().build();
 
         esc =
@@ -46,32 +46,32 @@ public class EnvironmentTest {
 
         esc = IBMEventStreams.getEventStreamsCredentials();
         assertNull(esc);
-        
-        esc = IBMEventStreams.parseEventStreamsCredentials("{}{\n" + 
-                "    \"api_key\": \"apiKey\",\n" + 
-                "    \"password\": \"password\",\n" + 
-                "    \"user\": \"user\",\n" + 
-                "    \"kafka_brokers_sasl\": [\n" + 
-                "        \"test\"\n" + 
-                "    ]\n" + 
+
+        esc = IBMEventStreams.parseEventStreamsCredentials("{}{\n" +
+                "    \"api_key\": \"apiKey\",\n" +
+                "    \"password\": \"password\",\n" +
+                "    \"user\": \"user\",\n" +
+                "    \"kafka_brokers_sasl\": [\n" +
+                "        \"test\"\n" +
+                "    ]\n" +
                 "}");
         assertNotNull(esc);
-        
-        esc = IBMEventStreams.parseEventStreamsCredentials("{\n" + 
-                "    \"api_key\": \"apiKey\",\n" + 
-                "    \"password\": \"password\",\n" + 
-                "    \"user\": \"user\",\n" + 
-                "    \"kafka_brokers_sasl\": [\n" + 
-                "        \"test\"\n" + 
-                "    ]\n" + 
+
+        esc = IBMEventStreams.parseEventStreamsCredentials("{\n" +
+                "    \"api_key\": \"apiKey\",\n" +
+                "    \"password\": \"password\",\n" +
+                "    \"user\": \"user\",\n" +
+                "    \"kafka_brokers_sasl\": [\n" +
+                "        \"test\"\n" +
+                "    ]\n" +
                 "}");
         assertNotNull(esc);
-        
+
         // Invalid
-        esc = IBMEventStreams.parseEventStreamsCredentials("" + 
-                "    \"api_key\": \"apiKey\",\n" + 
-                "        \"test\"\n" + 
-                "    ]\n" + 
+        esc = IBMEventStreams.parseEventStreamsCredentials("" +
+                "    \"api_key\": \"apiKey\",\n" +
+                "        \"test\"\n" +
+                "    ]\n" +
                 "}");
         assertNull(esc);
     }

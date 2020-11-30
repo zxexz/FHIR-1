@@ -48,7 +48,7 @@ public class KafkaService implements AuditLogService {
         logger.entering(CLASSNAME, METHODNAME);
 
         this.topic = translator.getTopic(auditLogProperties);
-        this.mapperType = MapperFactory.getMapperType(auditLogProperties);
+        this.mapperType = MapperType.getMapperType(auditLogProperties);
 
         this.producer = new KafkaProducer<>(translator.translate(auditLogProperties));
         if (this.producer == null) {

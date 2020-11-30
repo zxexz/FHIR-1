@@ -10,9 +10,9 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.ibm.fhir.audit.logging.api.AuditLogServiceConstants;
-import com.ibm.fhir.audit.logging.api.impl.kafka.environment.Kafka;
 import com.ibm.fhir.audit.logging.api.impl.kafka.environment.IBMEventStreams;
 import com.ibm.fhir.audit.logging.api.impl.kafka.environment.IBMEventStreams.EventStreamsCredentials;
+import com.ibm.fhir.audit.logging.api.impl.kafka.environment.Kafka;
 import com.ibm.fhir.config.PropertyGroup;
 import com.ibm.fhir.config.PropertyGroup.PropertyEntry;
 import com.ibm.fhir.exception.FHIRException;
@@ -122,7 +122,7 @@ public class ConfigurationTranslator {
         }
     }
 
-    /*
+    /**
      * gets the location to load the properties from:
      * 1 - Environment Bindings with EventStreams Credentials - "env"
      * 2 - fhir-server-config.json - "config"

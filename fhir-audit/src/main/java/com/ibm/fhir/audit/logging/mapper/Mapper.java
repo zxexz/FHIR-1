@@ -6,6 +6,7 @@
 package com.ibm.fhir.audit.logging.mapper;
 
 import com.ibm.fhir.audit.logging.beans.AuditLogEntry;
+import com.ibm.fhir.audit.logging.exception.FHIRAuditException;
 
 /**
  * Each implementing class is expected to be stateful.
@@ -14,5 +15,5 @@ public interface Mapper {
 
     Mapper map(AuditLogEntry entry);
 
-    String serialize();
+    String serialize() throws FHIRAuditException;
 }

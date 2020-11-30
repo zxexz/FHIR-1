@@ -299,7 +299,6 @@ public class RestAuditLogger {
                         break;
                     default:
                         break;
-
                     }
                 }
             }

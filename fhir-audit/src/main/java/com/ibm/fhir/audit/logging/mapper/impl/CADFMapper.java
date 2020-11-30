@@ -5,6 +5,7 @@
  */
 package com.ibm.fhir.audit.logging.mapper.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import com.ibm.fhir.audit.model.cadf.enums.Action;
 import com.ibm.fhir.audit.model.cadf.enums.Outcome;
 import com.ibm.fhir.audit.model.cadf.enums.ResourceType;
 import com.ibm.fhir.audit.model.common.EventType;
+import com.ibm.fhir.config.PropertyGroup;
 
 /**
  *
@@ -67,49 +69,64 @@ public class CADFMapper implements Mapper {
 
     @Override
     public Mapper map(AuditLogEntry entry) {
-        final String METHODNAME = "createCadfEvent";
+        final String METHODNAME = "map";
         logger.entering(CLASSNAME, METHODNAME);
         // Now, let's get the audit topic from FHIR config, if not found, then use the default topic
+        PropertyGroup auditLogProperties = null;
         if (auditLogProperties != null) {
-            geoCity = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_CITY, DEFAULT_AUDIT_GEO_CITY);
-            geoState = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_STATE, DEFAULT_AUDIT_GEO_STATE);
-            geoCountry = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_COUNTRY, DEFAULT_AUDIT_GEO_COUNTRY);
-        }
+            try {
+                geoCity = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_CITY, DEFAULT_AUDIT_GEO_CITY);
 
+                geoState = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_STATE, DEFAULT_AUDIT_GEO_STATE);
+                geoCountry = auditLogProperties.getStringProperty(PROPERTY_AUDIT_GEO_COUNTRY, DEFAULT_AUDIT_GEO_COUNTRY);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
         Outcome cadfEventOutCome;
 
         // Cadf does't log config, so skip
-        if ((logEntry.getEventType() != AuditLogEventType.FHIR_CONFIGDATA.value()) && logEntry.getContext() != null
-                && logEntry.getContext().getAction() != null && logEntry.getContext().getApiParameters() != null) {
+        if ((entry.getEventType() != AuditLogEventType.FHIR_CONFIGDATA.value()) && entry.getContext() != null
+                && entry.getContext().getAction() != null && entry.getContext().getApiParameters() != null) {
             // Define resources
             CadfResource initiator =
-                    new CadfResource.Builder(logEntry.getTenantId() + "@"
-                            + logEntry.getComponentId(), ResourceType.compute_machine).geolocation(new CadfGeolocation.Builder(geoCity, geoState, geoCountry, null).build()).credential(new CadfCredential.Builder("user-"
-                                    + logEntry.getUserName()).build()).host(logEntry.getComponentIp()).build();
+                    new CadfResource.Builder(entry.getTenantId() + "@"
+                            + entry.getComponentId(), ResourceType.compute_machine).geolocation(new CadfGeolocation.Builder(geoCity, geoState, geoCountry, null).build()).credential(new CadfCredential.Builder("user-"
+                                    + entry.getUserName()).build()).host(entry.getComponentIp()).build();
             CadfResource target =
-                    new CadfResource.Builder(logEntry.getContext().getData() == null || logEntry.getContext().getData().getId() == null
+                    new CadfResource.Builder(entry.getContext().getData() == null || entry.getContext().getData().getId() == null
                             ? UUID.randomUUID().toString()
-                            : logEntry.getContext().getData().getId(), ResourceType.data_database).geolocation(new CadfGeolocation.Builder(geoCity, geoState, geoCountry, null).build()).address(new CadfEndpoint(logEntry.getContext().getApiParameters().getRequest(), "", "")).build();
+                            : entry.getContext().getData().getId(), ResourceType.data_database).geolocation(new CadfGeolocation.Builder(geoCity, geoState, geoCountry, null).build()).address(new CadfEndpoint(entry.getContext().getApiParameters().getRequest(), "", "")).build();
 
-            FHIRContext fhirContext = new FHIRContext(logEntry.getContext());
-            fhirContext.setClient_cert_cn(logEntry.getClientCertCn());
-            fhirContext.setClient_cert_issuer_ou(logEntry.getClientCertIssuerOu());
-            fhirContext.setEventType(logEntry.getEventType());
-            fhirContext.setLocation(logEntry.getLocation());
-            fhirContext.setDescription(logEntry.getDescription());
+            FHIRContext fhirContext = new FHIRContext(entry.getContext());
+            fhirContext.setClient_cert_cn(entry.getClientCertCn());
+            fhirContext.setClient_cert_issuer_ou(entry.getClientCertIssuerOu());
+            fhirContext.setEventType(entry.getEventType());
+            fhirContext.setLocation(entry.getLocation());
+            fhirContext.setDescription(entry.getDescription());
 
-            if (logEntry.getContext().getEndTime() == null ||
-                    logEntry.getContext().getStartTime().equalsIgnoreCase(logEntry.getContext().getEndTime())) {
+            if (entry.getContext().getEndTime() == null ||
+                    entry.getContext().getStartTime().equalsIgnoreCase(entry.getContext().getEndTime())) {
                 cadfEventOutCome = Outcome.pending;
-            } else if (logEntry.getContext().getApiParameters().getStatus() < 400) {
+            } else if (entry.getContext().getApiParameters().getStatus() < 400) {
                 cadfEventOutCome = Outcome.success;
             } else {
                 cadfEventOutCome = Outcome.failure;
             }
 
-            event = new CadfEvent.Builder(logEntry.getContext().getRequestUniqueId() == null ? UUID.randomUUID().toString()
-                    : logEntry.getContext().getRequestUniqueId(), EventType.activity, logEntry.getTimestamp(), FHIR_TO_CADF_ACTION_MAP.getOrDefault(logEntry.getContext().getAction(), Action.unknown), cadfEventOutCome).observer(observerRsrc).initiator(initiator).target(target).tag(logEntry.getCorrelationId()).attachment(new CadfAttachment("application/json", FHIRContext.FHIRWriter.generate(fhirContext))).build();
+            try {
+                event = new CadfEvent.Builder(entry.getContext().getRequestUniqueId() == null ? UUID.randomUUID().toString()
+                        : entry.getContext().getRequestUniqueId(), EventType.activity, entry.getTimestamp(), FHIR_TO_CADF_ACTION_MAP.getOrDefault(entry.getContext().getAction(), Action.unknown),
+                        cadfEventOutCome)
+                        .observer(observerRsrc)
+                        .initiator(initiator).target(target)
+                        .tag(entry.getCorrelationId()).attachment(new CadfAttachment("application/json", FHIRContext.FHIRWriter.generate(fhirContext))).build();
+            } catch (IllegalStateException | IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         logger.exiting(CLASSNAME, METHODNAME);
@@ -121,7 +138,4 @@ public class CADFMapper implements Mapper {
         // TODO Auto-generated method stub
         return null;
     }
-
-
-
 }

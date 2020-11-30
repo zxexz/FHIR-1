@@ -6,8 +6,7 @@
 package com.ibm.fhir.audit.logging.mapper;
 
 import com.ibm.fhir.audit.logging.mapper.impl.CADFMapper;
-import com.ibm.fhir.audit.logging.mapper.impl.FHIRAuditEventMapper;
-import com.ibm.fhir.config.PropertyGroup;
+import com.ibm.fhir.audit.logging.mapper.impl.AuditEventMapper;
 
 /**
  *
@@ -25,18 +24,10 @@ public class MapperFactory {
         case CADF:
             return new CADFMapper();
         case FHIR:
-            return new FHIRAuditEventMapper();
+            return new AuditEventMapper();
         default:
-            throw new IllegalArgumentException("the mapper registed does not exist");
+            throw new IllegalArgumentException("the registered mapper does not exist");
         }
     }
 
-    /**
-     * @param auditLogProperties
-     * @return
-     */
-    public static MapperType getMapperType(PropertyGroup auditLogProperties) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

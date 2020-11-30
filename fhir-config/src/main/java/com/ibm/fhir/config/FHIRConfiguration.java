@@ -70,6 +70,7 @@ public class FHIRConfiguration {
     public static final String PROPERTY_AUDIT_SERVICE_CLASS_NAME = "fhirServer/audit/serviceClassName";
     public static final String PROPERTY_AUDIT_SERVICE_PROPERTIES = "fhirServer/audit/serviceProperties";
     public static final String PROPERTY_AUDIT_PATIENT_ID_EXTURL = "fhirServer/audit/patientIdExtensionUrl";
+    public static final String PROPERTY_AUDIT_SERVICE_MAPPER_TYPE = "fhirServer/audit/mapperType";
 
     // Notification config properties
     public static final String PROPERTY_NOTIFICATION_RESOURCE_TYPES = "fhirServer/notifications/common/includeResourceTypes";
