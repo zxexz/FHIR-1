@@ -6,6 +6,8 @@
 
 package com.ibm.fhir.audit.logging.beans;
 
+import java.time.LocalDate;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -162,5 +164,29 @@ public class AuditLogEntry {
 
     public void setPatientId(String patientId) {
         this.patientId = patientId;
+    }
+
+    /**
+     * @return
+     */
+    public LocalDate getStartDate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * @return
+     */
+    public LocalDate getEndDate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * @return
+     */
+    public Object getPurposeOfUse() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

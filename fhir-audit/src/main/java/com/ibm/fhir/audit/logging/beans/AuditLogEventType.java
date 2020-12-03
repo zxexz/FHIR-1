@@ -26,9 +26,23 @@ public enum AuditLogEventType {
 
     FHIR_HISTORY("fhir-history"),
 
+    FHIR_HISTORY_INSTANCE("fhir-history-instance"),
+
+    FHIR_HISTORY_TYPE("fhir-history-type"),
+
+    FHIR_HISTORY_SYSTEM("fhir-history-system"),
+
     FHIR_SEARCH("fhir-search"),
 
+    FHIR_SEARCH_SYSTEM_TYPE("fhir-search-type"),
+
+    FHIR_SEARCH_SYSTEM("fhir-search-system"),
+
     FHIR_BUNDLE("fhir-bundle"),
+
+    FHIR_TRANSACTION("fhir-transaction"),
+
+    FHIR_BATCH("fhir-batch"),
 
     FHIR_VALIDATE("fhir-validate"),
 

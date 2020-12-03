@@ -18,7 +18,7 @@ import com.ibm.fhir.config.PropertyGroup.PropertyEntry;
 import com.ibm.fhir.exception.FHIRException;
 
 /**
- *
+ * The ConfigurationTranslator takes the AuditLogProperties and
  */
 public class ConfigurationTranslator {
 
@@ -37,7 +37,7 @@ public class ConfigurationTranslator {
      * @throws Exception
      */
     public Properties translate(PropertyGroup auditLogProperties) throws Exception {
-        ConfigurationType type = loadFromEnvironment(auditLogProperties);
+        ConfigurationType type = ConfigurationType.loadFromEnvironment(auditLogProperties);
         Properties props = new Properties();
         switch (type) {
         case CONFIG:
@@ -46,8 +46,8 @@ public class ConfigurationTranslator {
         case ENVIRONMENT:
             environment(props, auditLogProperties);
             break;
-        default:
-            logger.warning("unable to determine where to load from");
+        case UNKNOWN:
+            logger.warning("unable to determine where properties are to be loaded");
             break;
         }
         return props;
@@ -65,7 +65,7 @@ public class ConfigurationTranslator {
             props.put(entry.getName(), entry.getValue());
         }
 
-        // Every instance needs to be loaded:
+        // Every instance needs these to be loaded:
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
     }
@@ -122,23 +122,7 @@ public class ConfigurationTranslator {
         }
     }
 
-    /**
-     * gets the location to load the properties from:
-     * 1 - Environment Bindings with EventStreams Credentials - "env"
-     * 2 - fhir-server-config.json - "config"
-     * @param auditLogProperties
-     * @return
-     */
-    public ConfigurationType loadFromEnvironment(PropertyGroup auditLogProperties) {
-        Objects.requireNonNull(auditLogProperties, "Expected Non Null audit log properties");
-        ConfigurationType type = ConfigurationType.CONFIG;
-        try {
-            type = ConfigurationType.valueOf(auditLogProperties.getStringProperty(AuditLogServiceConstants.FIELD_LOAD, ConfigurationType.CONFIG.value()));
-        } catch (Exception e) {
-            logger.warning("Using FHIR config to find location to load environments.");
-        }
-        return type;
-    }
+
 
     /**
      * gets the topic used in the logging of the audit messages.

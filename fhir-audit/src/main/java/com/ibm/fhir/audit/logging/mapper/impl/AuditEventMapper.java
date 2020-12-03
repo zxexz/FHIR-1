@@ -10,17 +10,28 @@ import static com.ibm.fhir.model.type.String.string;
 import static com.ibm.fhir.model.type.Uri.uri;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.ibm.fhir.audit.logging.beans.AuditLogEntry;
+import com.ibm.fhir.audit.logging.beans.AuditLogEventType;
 import com.ibm.fhir.audit.logging.exception.FHIRAuditException;
 import com.ibm.fhir.audit.logging.mapper.Mapper;
 import com.ibm.fhir.model.format.Format;
 import com.ibm.fhir.model.generator.FHIRGenerator;
 import com.ibm.fhir.model.resource.AuditEvent;
+import com.ibm.fhir.model.resource.AuditEvent.Agent;
+import com.ibm.fhir.model.resource.AuditEvent.Entity;
+import com.ibm.fhir.model.resource.AuditEvent.Source;
+import com.ibm.fhir.model.type.CodeableConcept;
 import com.ibm.fhir.model.type.Coding;
+import com.ibm.fhir.model.type.Instant;
+import com.ibm.fhir.model.type.Reference;
+import com.ibm.fhir.model.type.code.AuditEventAction;
+import com.ibm.fhir.model.type.code.AuditEventOutcome;
 
 /**
  * The AuditEventMapper maps the AuditLogEntry to the FHIR standard format.
@@ -43,7 +54,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_READ = Coding.builder()
             .code(code("read"))
-            .display(string("Read the current state of the resource."))
+            .display(string("read"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -51,7 +62,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_VREAD = Coding.builder()
             .code(code("vread"))
-            .display(string("Read the state of a specific version of the resource."))
+            .display(string("vread"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -59,7 +70,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_UPDATE = Coding.builder()
             .code(code("update"))
-            .display(string("Update an existing resource by its id (or create it if it is new)."))
+            .display(string("update"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -67,7 +78,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_PATCH = Coding.builder()
             .code(code("patch"))
-            .display(string("Update an existing resource by posting a set of changes to it."))
+            .display(string("patch"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -75,7 +86,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_DELETE = Coding.builder()
             .code(code("delete"))
-            .display(string("Delete a resource."))
+            .display(string("delete"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -83,7 +94,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_HISTORY = Coding.builder()
             .code(code("history"))
-            .display(string("Retrieve the change history for a particular resource, type of resource, or the entire system."))
+            .display(string("history"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -91,7 +102,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_HISTORY_INSTANCE = Coding.builder()
             .code(code("history-instance"))
-            .display(string("Retrieve the change history for a particular resource."))
+            .display(string("history-instance"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -99,7 +110,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_HISTORY_TYPE = Coding.builder()
             .code(code("history-type"))
-            .display(string("Retrieve the change history for all resources of a particular type."))
+            .display(string("history-type"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -107,7 +118,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_HISTORY_SYSTEM = Coding.builder()
             .code(code("history-system"))
-            .display(string("Retrieve the change history for all resources on a system."))
+            .display(string("history-system"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -115,7 +126,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_CREATE = Coding.builder()
             .code(code("create"))
-            .display(string("Create a new resource with a server assigned id."))
+            .display(string("create"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -123,7 +134,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_SEARCH = Coding.builder()
             .code(code("search"))
-            .display(string("Search a resource type or all resources based on some filter criteria."))
+            .display(string("search"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -131,7 +142,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_SEARCH_TYPE = Coding.builder()
             .code(code("search-type"))
-            .display(string("Search all resources of the specified type based on some filter criteria."))
+            .display(string("search-type"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -139,7 +150,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_SEARCH_SYSTEM = Coding.builder()
             .code(code("search-system"))
-            .display(string("Search all resources based on some filter criteria."))
+            .display(string("search-system"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -147,7 +158,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_CAPABILITIES = Coding.builder()
             .code(code("capabilities"))
-            .display(string("Get a Capability Statement for the system."))
+            .display(string("capabilities"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -155,7 +166,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_TRANSACTION = Coding.builder()
             .code(code("transaction"))
-            .display(string("Update, create or delete a set of resources as a single transaction."))
+            .display(string("transaction"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -163,7 +174,7 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_BATCH = Coding.builder()
             .code(code("batch"))
-            .display(string("Perform a set of a separate interactions in a single http operation"))
+            .display(string("batch"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
@@ -171,12 +182,22 @@ public class AuditEventMapper implements Mapper {
     //@formatter:off
     private static final Coding SUBTYPE_OPERATION = Coding.builder()
             .code(code("operation"))
-            .display(string("Perform an operation as defined by an OperationDefinition."))
+            .display(string("operation"))
             .system(uri("http://hl7.org/fhir/restful-interaction"))
             .build();
     //@formatter:on
 
-    private static final Map<AuditLogEventType,Coding> MAP_TO_SUBTYPE = buildMapToSubtype();
+    //@formatter:off
+    private static final Coding SOURCE_AUDIT = Coding.builder()
+            .code(code("4"))
+            .display(string("Application Server"))
+            .system(uri("http://terminology.hl7.org/CodeSystem/security-source-type"))
+            .build();
+    //@formatter:on
+
+    // These are loaded one time when the JVM starts up and this class is activated.
+    private static final Map<String, Coding> MAP_TO_SUBTYPE = buildMapToSubtype();
+    private static final Map<String, AuditEventAction> MAP_TO_ACTION = buildMapToAction();
 
     private AuditEvent.Builder builder = AuditEvent.builder();
 
@@ -187,21 +208,31 @@ public class AuditEventMapper implements Mapper {
 
         // Everything on this server is an initiated RESTFUL Operation
         // @link https://www.hl7.org/fhir/valueset-audit-event-type.html
-        //@formatter:off
+        // @formatter:off
         builder.type(TYPE)
-            //
-            .subtype(subtype(entry));
-        //@formatter:on
-
-        action(entry);
-        period(entry);
-        recorded(entry);
-        outcome(entry);
-        outcomeDesc(entry);
-        purposeOfEvent(entry);
-        agent(entry);
-        source(entry);
-        entity(entry);
+            // We map to a single sub-type, however, in the future we may use multiple.
+            // @link https://www.hl7.org/fhir/valueset-audit-event-sub-type.html#expansion
+            .subtype(Arrays.asList(MAP_TO_SUBTYPE.get(entry.getEventType())))
+            // Mapping our AuditEventType to a specific C-R-U-D-E
+            // @link https://www.hl7.org/fhir/valueset-audit-event-action.html
+            .action(MAP_TO_ACTION.get(entry.getEventType()))
+            // Period involves start/end
+            .period(period(entry))
+            // Now, when we are crerating this AuditEvent
+            .recorded(Instant.now())
+            // Agent is the Actor involved in the event
+            .agent(agent(entry))
+            // Whether the event succeeded or failed
+            .outcome(outcome(entry))
+            // Description of the event outcome
+            .outcomeDesc(outcomeDesc(entry))
+            // The purposeOfUse of the event
+            .purposeOfEvent(purposeOfEvent(entry))
+            // source is the 'Audit Event Reporter' this server
+            .source(source(entry))
+            // Data or objects used in the audit
+            .entity(entity(entry));
+        // @formatter:on
         logger.exiting(CLASSNAME, METHODNAME);
         return this;
     }
@@ -218,57 +249,140 @@ public class AuditEventMapper implements Mapper {
         }
     }
 
-    private static Map<AuditLogEventType,Coding> buildMapToSubtype() {
+    // Map String to Code SubTypes
+    private static Map<String, Coding> buildMapToSubtype() {
+        Map<String, Coding> map = new HashMap<>();
+        map.put(AuditLogEventType.FHIR_READ.value(), SUBTYPE_READ);
+        map.put(AuditLogEventType.FHIR_VREAD.value(), SUBTYPE_VREAD);
+        map.put(AuditLogEventType.FHIR_UPDATE.value(), SUBTYPE_UPDATE);
+        map.put(AuditLogEventType.FHIR_PATCH.value(), SUBTYPE_PATCH);
+        map.put(AuditLogEventType.FHIR_DELETE.value(), SUBTYPE_DELETE);
+        map.put(AuditLogEventType.FHIR_HISTORY.value(), SUBTYPE_HISTORY);
+        map.put(AuditLogEventType.FHIR_HISTORY_INSTANCE.value(), SUBTYPE_HISTORY_INSTANCE);
+        map.put(AuditLogEventType.FHIR_HISTORY_TYPE.value(), SUBTYPE_HISTORY_TYPE);
+        map.put(AuditLogEventType.FHIR_HISTORY_SYSTEM.value(), SUBTYPE_HISTORY_SYSTEM);
+        map.put(AuditLogEventType.FHIR_CREATE.value(), SUBTYPE_CREATE);
+        map.put(AuditLogEventType.FHIR_SEARCH.value(), SUBTYPE_SEARCH);
+        map.put(AuditLogEventType.FHIR_SEARCH_SYSTEM_TYPE.value(), SUBTYPE_SEARCH_TYPE);
+        map.put(AuditLogEventType.FHIR_SEARCH_SYSTEM.value(), SUBTYPE_SEARCH_SYSTEM);
+        map.put(AuditLogEventType.FHIR_METADATA.value(), SUBTYPE_CAPABILITIES);
+        map.put(AuditLogEventType.FHIR_TRANSACTION.value(), SUBTYPE_TRANSACTION);
+        map.put(AuditLogEventType.FHIR_BUNDLE.value(), SUBTYPE_BATCH);
+        map.put(AuditLogEventType.FHIR_BATCH.value(), SUBTYPE_BATCH);
+        map.put(AuditLogEventType.FHIR_OPERATION.value(), SUBTYPE_OPERATION);
+        map.put(AuditLogEventType.FHIR_VALIDATE.value(), SUBTYPE_OPERATION);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_IMPORT.value(), SUBTYPE_OPERATION);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_IMPORT.value(), SUBTYPE_OPERATION);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_SEARCH.value(), SUBTYPE_OPERATION);
+        return map;
+    }
 
+    // Map to AuditEventAction
+    private static Map<String, AuditEventAction> buildMapToAction() {
+        Map<String, AuditEventAction> map = new HashMap<>();
+        map.put(AuditLogEventType.FHIR_READ.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_VREAD.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_UPDATE.value(), AuditEventAction.U);
+        map.put(AuditLogEventType.FHIR_PATCH.value(), AuditEventAction.U);
+        map.put(AuditLogEventType.FHIR_DELETE.value(), AuditEventAction.D);
+        map.put(AuditLogEventType.FHIR_HISTORY.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_HISTORY_INSTANCE.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_HISTORY_TYPE.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_HISTORY_SYSTEM.value(), AuditEventAction.R);
+        map.put(AuditLogEventType.FHIR_CREATE.value(), AuditEventAction.C);
+        map.put(AuditLogEventType.FHIR_SEARCH.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_SEARCH_SYSTEM_TYPE.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_SEARCH_SYSTEM.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_METADATA.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_TRANSACTION.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_BUNDLE.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_BATCH.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_OPERATION.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_VALIDATE.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_IMPORT.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_IMPORT.value(), AuditEventAction.E);
+        map.put(AuditLogEventType.FHIR_OPERATION_BULKDATA_SEARCH.value(), AuditEventAction.E);
+        return map;
     }
 
     /*
-     *
-     * @link https://www.hl7.org/fhir/valueset-audit-event-sub-type.html#expansion
+     * generate a period from the audit log entry
      */
-    private List<Coding> subtype(AuditLogEntry entry) {
-        List<Coding> subtypes = new ArrayList<>();
-        switch(entry.getEventType()) {
-            "fhir-create":
-
-                break;
-
-        }
-        return subtypes;
+    private com.ibm.fhir.model.type.Period period(AuditLogEntry entry) {
+        // @formatter:off
+        return com.ibm.fhir.model.type.Period.builder()
+                    .start(com.ibm.fhir.model.type.DateTime.of(entry.getStartDate()))
+                    .end(com.ibm.fhir.model.type.DateTime.of(entry.getEndDate()))
+                    .build();
+        // @formatter:on
     }
 
-    private void entity(AuditLogEntry entry) {
+    private Agent agent(AuditLogEntry entry) {
+        Agent.Builder builder = Agent.builder();
+        builder.
+
+
+        return builder.build();
     }
 
-    private void source(AuditLogEntry entry) {
+    private Entity entity(AuditLogEntry entry) {
+        // @formatter:off
+        Entity.Builder builder = Entity.builder()
+                .what(what)
+                .type()
+                .role()
+                .lifecycle()
+                .securityLabel()
+                .name()
+                .description();
+        // @formatter:on
+        if searrch
+            builder.query(query)
+
+        return builder.build();
     }
 
-    private void agent(AuditLogEntry entry) {
-
+    /*
+     * uses the location from the audit properties as passed in to AuditLogEntrys
+     */
+    private Source source(AuditLogEntry entry) {
+        // @formatter:off
+        return Source.builder()
+                .type(SOURCE_AUDIT)
+                .site(string(entry.getLocation()))
+                .observer(Reference.builder()
+                            .reference(string(entry.getComponentId()))
+                            .build())
+                .build();
+        // @formatter:on
     }
 
-    private void purposeOfEvent(AuditLogEntry entry) {
-
+    private List<CodeableConcept> purposeOfEvent(AuditLogEntry entry) {
+        /*
+         * this may be something to make more extensible in the future.
+         * @link https://www.hl7.org/fhir/v3/PurposeOfUse/vs.html
+         */
+        // @formatter:off
+        return Arrays.asList(CodeableConcept.builder()
+                    .coding(Coding.builder()
+                            .code(code("PurposeOfUse"))
+                            .display(string("PurposeOfUse"))
+                            .system(uri("http://terminology.hl7.org/CodeSystem/v3-ActReason"))
+                            .build())
+                    .build());
+        // @formatter:on
     }
 
-    private void outcomeDesc(AuditLogEntry entry) {
-
+    /*
+     * currently we only log successes. In the future, we could
+     * enhance this part to log the alternative outcomes.
+     * This applies to the next two methods: outcomeDesc, outcome
+     */
+    private com.ibm.fhir.model.type.String outcomeDesc(AuditLogEntry entry) {
+        return string("success");
     }
 
-    private void outcome(AuditLogEntry entry) {
-
+    private AuditEventOutcome outcome(AuditLogEntry entry) {
+        return AuditEventOutcome.OUTCOME_0;
     }
-
-    private void recorded(AuditLogEntry entry) {
-
-    }
-
-    private void period(AuditLogEntry entry) {
-
-    }
-
-    private void action(AuditLogEntry entry) {
-
-    }
-
 }
