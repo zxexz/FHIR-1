@@ -4,7 +4,7 @@
         <property name="fhir.cosreadsperdbbatch" value="#{jobParameters['fhir.cosreadsperdbbatch']}?:1;" />
     </properties>
     <listeners>
-        <listener ref="com.ibm.fhir.jbatch.bulkdata.load.ImportJobListener">
+        <listener ref="com.ibm.fhir.jbatch.bulkdata.load.Listener">
             <properties>
                 <property name="fhir.dataSourcesInfo" value="#{jobParameters['fhir.dataSourcesInfo']}"/>
             </properties>
@@ -12,7 +12,7 @@
     </listeners>
     <step id="step1">
         <chunk checkpoint-policy="item" item-count="#{jobProperties['fhir.cosreadsperdbbatch']}">
-            <reader ref="com.ibm.fhir.jbatch.bulkdata.load.ChunkReader">
+            <reader ref="com.ibm.fhir.jbatch.bulkdata.load.Reader">
                 <properties>
                     <property name="fhir.tenant" value="#{jobParameters['fhir.tenant']}"/>
                     <property name="fhir.datastoreid" value="#{jobParameters['fhir.datastoreid']}"/>
@@ -29,7 +29,7 @@
                     <property name="incomingUrl" value="#{jobParameters['incomingUrl']}"/>
                 </properties>
             </reader>
-            <writer ref="com.ibm.fhir.jbatch.bulkdata.load.ChunkWriter">
+            <writer ref="com.ibm.fhir.jbatch.bulkdata.load.Writer">
                 <properties >
                     <property name="fhir.tenant" value="#{jobParameters['fhir.tenant']}"/>
                     <property name="fhir.datastoreid" value="#{jobParameters['fhir.datastoreid']}"/>
@@ -41,13 +41,12 @@
                     <property name="cos.location" value="#{jobParameters['cos.location']}"/>
                     <property name="cos.credential.ibm" value="#{jobParameters['cos.credential.ibm']}"/>
                     <property name="cos.operationoutcomes.bucket.name" value="#{jobParameters['cos.operationoutcomes.bucket.name']}"/>
-                    <property name="import.fhir.validation" value="#{jobParameters['import.fhir.validation']}"/>
                     <property name="incomingUrl" value="#{jobParameters['incomingUrl']}"/>
                 </properties>
             </writer>
         </chunk>
         <partition>
-            <mapper ref="com.ibm.fhir.jbatch.bulkdata.load.ImportPartitionMapper">
+            <mapper ref="com.ibm.fhir.jbatch.bulkdata.load.Mapper">
                 <properties>
                     <property name="fhir.tenant" value="#{jobParameters['fhir.tenant']}"/>
                     <property name="fhir.datastoreid" value="#{jobParameters['fhir.datastoreid']}"/>
@@ -62,7 +61,7 @@
                     <property name="import.fhir.storagetype" value="#{jobParameters['import.fhir.storagetype']}"/>
                 </properties>
             </mapper>
-            <collector ref="com.ibm.fhir.jbatch.bulkdata.load.ImportPartitionCollector">
+            <collector ref="com.ibm.fhir.jbatch.bulkdata.load.Collector">
                 <properties>
                     <property name="cos.api.key" value="#{jobParameters['cos.api.key']}"/>
                     <property name="cos.srvinst.id" value="#{jobParameters['cos.srvinst.id']}"/>
@@ -73,7 +72,7 @@
                     <property name="cos.operationoutcomes.bucket.name" value="#{jobParameters['cos.operationoutcomes.bucket.name']}"/>
                 </properties>
             </collector>
-            <analyzer ref="com.ibm.fhir.jbatch.bulkdata.load.ImportPartitionAnalyzer"/>
+            <analyzer ref="com.ibm.fhir.jbatch.bulkdata.load.Analyzer"/>
         </partition>
     </step>
 </job>

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2020
+ * (C) Copyright IBM Corp. 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -36,7 +36,6 @@ public class Constants {
     public static final String FHIR_DATASTORE_ID = "fhir.datastoreid";
     public static final String FHIR_RESOURCETYPES = "fhir.resourcetype";
     public static final String IMPORT_FHIR_STORAGE_TYPE = "import.fhir.storagetype";
-    public static final String IMPORT_FHIR_IS_VALIDATION_ON = "import.fhir.validation";
     public static final String IMPORT_FHIR_DATASOURCES = "fhir.dataSourcesInfo";
     public static final String EXPORT_FHIR_SEARCH_FROMDATE = "fhir.search.fromdate";
     public static final String EXPORT_FHIR_SEARCH_TODATE = "fhir.search.todate";

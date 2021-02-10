@@ -135,6 +135,7 @@ public class FHIRConfiguration {
     public static final String PROPERTY_BULKDATA_PATIENTEXPORT_PAGESIZE = "fhirServer/bulkdata/patientExportPageSize";
     // Control if push OperationOutcomes to COS/S3.
     public static final String PROPERTY_BULKDATA_IGNORE_IMPORT_OPERATION_OUTCOMES = "fhirServer/bulkdata/ignoreImportOutcomes";
+    public static final String PROPERTY_BULKDATA_VALIDATE_IMPORT_RESOURCES = "fhirServer/bulkdata/validateImportResources";
 
     // Custom header names
     public static final String DEFAULT_TENANT_ID_HEADER_NAME = "X-FHIR-TENANT-ID";

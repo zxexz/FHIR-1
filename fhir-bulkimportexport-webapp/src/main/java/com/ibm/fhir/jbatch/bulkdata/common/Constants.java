@@ -14,6 +14,11 @@ public class Constants {
     public static final String DEFAULT_COS_BUCKETNAME = "fhir-bulkImExport-Connectathon";
 
     /**
+     * Audit Component ID
+     */
+    public static final String COMPONENT_ID = "fhir-bulkdata-server";
+
+    /**
      * The minimal size (10MiB) for COS multiple-parts upload (NDJSON-only).
      */
     public static final long COS_PART_MINIMALSIZE = 10485760;
@@ -70,7 +75,6 @@ public class Constants {
     public static final String FHIR_DATASTORE_ID = "fhir.datastoreid";
     public static final String FHIR_RESOURCETYPES = "fhir.resourcetype";
     public static final String IMPORT_FHIR_STORAGE_TYPE = "import.fhir.storagetype";
-    public static final String IMPORT_FHIR_IS_VALIDATION_ON = "import.fhir.validation";
     public static final String IMPORT_FHIR_DATASOURCES = "fhir.dataSourcesInfo";
     public static final String EXPORT_FHIR_SEARCH_FROMDATE = "fhir.search.fromdate";
     public static final String EXPORT_FHIR_SEARCH_TODATE = "fhir.search.todate";

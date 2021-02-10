@@ -29,10 +29,12 @@ import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
 import com.ibm.fhir.config.FHIRConfigHelper;
 import com.ibm.fhir.config.FHIRConfiguration;
 import com.ibm.fhir.jbatch.bulkdata.common.BulkDataUtils;
+import com.ibm.fhir.jbatch.bulkdata.load.data.ImportCheckPointData;
+import com.ibm.fhir.jbatch.bulkdata.load.data.ImportTransientUserData;
 
 @Dependent
-public class ImportPartitionCollector implements PartitionCollector {
-    private static final Logger logger = Logger.getLogger(ImportPartitionCollector.class.getName());
+public class Collector implements PartitionCollector {
+    private static final Logger logger = Logger.getLogger(Collector.class.getName());
 
     @Inject
     StepContext stepCtx;
@@ -81,7 +83,7 @@ public class ImportPartitionCollector implements PartitionCollector {
 
     private AmazonS3 cosClient = null;
 
-    public ImportPartitionCollector() {
+    public Collector() {
         // The injected properties are not available at class construction time
         // These values are lazy injected BEFORE calling 'collectPartitionData'.
     }

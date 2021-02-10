@@ -22,22 +22,27 @@ import javax.batch.runtime.context.JobContext;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.ibm.fhir.jbatch.bulkdata.load.data.ImportCheckPointData;
+
 @Dependent
-public class ImportPartitionAnalyzer implements PartitionAnalyzer {
-    private static final Logger logger = Logger.getLogger(ImportPartitionAnalyzer.class.getName());
+public class Analyzer implements PartitionAnalyzer {
+    private static final Logger logger = Logger.getLogger(Analyzer.class.getName());
+
     @Inject
     JobContext jobContext;
 
     private List<ImportCheckPointData> partitionSummaries = new ArrayList<>();
+
     // Used for generating in-fly performance measurement per each resource type.
     private HashMap<String, ImportCheckPointData> importedResourceTypeInFlySummaries = new HashMap<>();
 
-    public ImportPartitionAnalyzer() {
+    public Analyzer() {
+        // No Operation
     }
 
     @Override
     public void analyzeStatus(BatchStatus batchStatus, String exitStatus) {
-
+        // No Operation
     }
 
     @Override
@@ -51,7 +56,6 @@ public class ImportPartitionAnalyzer implements PartitionAnalyzer {
             partitionSummaries.add(partitionSummaryForMetrics);
             jobContext.setTransientUserData(partitionSummaries);
         }
-
 
         // Aggregate the processed resource numbers from different partitions for the same resource types.
         ImportCheckPointData importedResourceTypeInFlySummary = importedResourceTypeInFlySummaries.get(partitionSummaryForMetrics.getImportPartitionResourceType());
@@ -81,6 +85,5 @@ public class ImportPartitionAnalyzer implements PartitionAnalyzer {
                 importedResourceTypeInFlySummary.setInFlyRateBeginMilliSeconds(currentTimeMilliSeconds);
             }
         }
-
     }
 }

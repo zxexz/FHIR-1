@@ -47,10 +47,11 @@ import com.ibm.fhir.config.FHIRConfigHelper;
 import com.ibm.fhir.config.FHIRConfiguration;
 import com.ibm.fhir.config.FHIRRequestContext;
 import com.ibm.fhir.jbatch.bulkdata.common.BulkDataUtils;
+import com.ibm.fhir.jbatch.bulkdata.common.StorageType;
 
 @Dependent
-public class ImportPartitionMapper implements PartitionMapper {
-    private static final Logger logger = Logger.getLogger(ImportPartitionMapper.class.getName());
+public class Mapper implements PartitionMapper {
+    private static final Logger logger = Logger.getLogger(Mapper.class.getName());
     private AmazonS3 cosClient = null;
 
     @Inject
@@ -166,7 +167,7 @@ public class ImportPartitionMapper implements PartitionMapper {
     @BatchProperty(name = FHIR_DATASTORE_ID)
     String fhirDatastoreId;
 
-    public ImportPartitionMapper() {
+    public Mapper() {
         // No Operation
     }
 
@@ -277,7 +278,7 @@ public class ImportPartitionMapper implements PartitionMapper {
         return fhirDataSources;
     }
 
-    private List<FhirDataSource> getFhirDataSources(JsonArray dataSourceArray, BulkImportDataSourceStorageType type)
+    private List<FhirDataSource> getFhirDataSources(JsonArray dataSourceArray, StorageType type)
             throws Exception {
         List<FhirDataSource> fhirDataSources = new ArrayList<>();
         for (JsonValue jsonValue : dataSourceArray) {
@@ -307,7 +308,7 @@ public class ImportPartitionMapper implements PartitionMapper {
         JsonArray dataSourceArray = BulkDataUtils.getDataSourcesFromJobInput(dataSourcesInfo);
 
         List<FhirDataSource> fhirDataSources =
-                getFhirDataSources(dataSourceArray, BulkImportDataSourceStorageType.from(dataSourceStorageType));
+                getFhirDataSources(dataSourceArray, StorageType.from(dataSourceStorageType));
 
         PartitionPlanImpl pp = new PartitionPlanImpl();
         pp.setPartitions(fhirDataSources.size());
@@ -321,7 +322,6 @@ public class ImportPartitionMapper implements PartitionMapper {
             p.setProperty(PARTITION_RESOURCE_TYPE, fhirDataSource.getType());
 
             partitionProps[propCount++] = p;
-            System.out.println(p);
         }
         pp.setPartitionProperties(partitionProps);
 

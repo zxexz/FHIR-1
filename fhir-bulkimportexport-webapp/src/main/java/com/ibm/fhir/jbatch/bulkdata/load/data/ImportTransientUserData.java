@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.ibm.fhir.jbatch.bulkdata.load;
+package com.ibm.fhir.jbatch.bulkdata.load.data;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+
+import com.ibm.fhir.jbatch.bulkdata.common.ErrorConditions;
 
 public class ImportTransientUserData extends ImportCheckPointData {
     private static final long serialVersionUID = -2642411992044844735L;
@@ -19,6 +21,8 @@ public class ImportTransientUserData extends ImportCheckPointData {
 
     private InputStream inputStream = null;
     private BufferedReader bufferReader = null;
+
+    private ErrorConditions conditions = null;
 
     protected ImportTransientUserData() {
         super();
@@ -101,6 +105,20 @@ public class ImportTransientUserData extends ImportCheckPointData {
 
     public void setBufferReader(BufferedReader bufferReader) {
         this.bufferReader = bufferReader;
+    }
+
+    /**
+     * @return the conditions
+     */
+    public ErrorConditions getConditions() {
+        return conditions;
+    }
+
+    /**
+     * @param conditions the conditions to set
+     */
+    public void setConditions(ErrorConditions conditions) {
+        this.conditions = conditions;
     }
 
 }

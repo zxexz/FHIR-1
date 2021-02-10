@@ -1,12 +1,12 @@
 /*
- * (C) Copyright IBM Corp. 2020
+ * (C) Copyright IBM Corp. 2020, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.ibm.fhir.jbatch.bulkdata.load;
+package com.ibm.fhir.jbatch.bulkdata.common;
 
-public enum BulkImportDataSourceStorageType {
+public enum StorageType {
     HTTPS("https"),
     FILE("file"),
     AWSS3("aws-s3"),
@@ -14,7 +14,7 @@ public enum BulkImportDataSourceStorageType {
 
     private final String value;
 
-    BulkImportDataSourceStorageType(String value) {
+    StorageType(String value) {
         this.value = value;
     }
 
@@ -22,8 +22,8 @@ public enum BulkImportDataSourceStorageType {
         return value;
     }
 
-    public static BulkImportDataSourceStorageType from(String value) {
-        for (BulkImportDataSourceStorageType c : BulkImportDataSourceStorageType.values()) {
+    public static StorageType from(String value) {
+        for (StorageType c : StorageType.values()) {
             if (c.value.equals(value)) {
                 return c;
             }

@@ -27,7 +27,7 @@ import com.ibm.fhir.persistence.interceptor.impl.FHIRPersistenceInterceptorMgr;
  */
 public class FHIRNotificationService implements FHIRPersistenceInterceptor {
     private static final Logger log = java.util.logging.Logger.getLogger(FHIRNotificationService.class.getName());
-    private List<FHIRNotificationSubscriber> subscribers = new CopyOnWriteArrayList<FHIRNotificationSubscriber>();
+    private List<FHIRNotificationSubscriber> subscribers = new CopyOnWriteArrayList<>();
     private static final FHIRNotificationService INSTANCE = new FHIRNotificationService();
     private Set<String> includedResourceTypes = Collections.synchronizedSortedSet(new TreeSet<String>());
 
@@ -147,13 +147,10 @@ public class FHIRNotificationService implements FHIRPersistenceInterceptor {
     }
 
     @Override
-    public void beforeCreate(FHIRPersistenceEvent pEvent) throws FHIRPersistenceInterceptorException {
-        // Nothing to do for 'beforeCreate'.
-    }
-
-    @Override
-    public void beforeUpdate(FHIRPersistenceEvent event) throws FHIRPersistenceInterceptorException {
-        // Nothing to do for 'beforeUpdate'.
+    public void afterDelete(FHIRPersistenceEvent pEvent) throws FHIRPersistenceInterceptorException {
+        if (shouldPublish(pEvent)) {
+            this.publish(buildNotificationEvent("delete", pEvent));
+        }
     }
 
     /**

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package com.ibm.fhir.jbatch.bulkdata.load;
+package com.ibm.fhir.jbatch.bulkdata.load.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -345,6 +345,10 @@ public class ImportCheckPointData implements Serializable {
 
     public void setTotalValidationMilliSeconds(long totalValidationMilliSeconds) {
         this.totalValidationMilliSeconds = totalValidationMilliSeconds;
+    }
+
+    public void addToTotalValidationMilliSeconds(long delta) {
+        this.totalValidationMilliSeconds += delta;
     }
 
     public long getImportFileSize() {
