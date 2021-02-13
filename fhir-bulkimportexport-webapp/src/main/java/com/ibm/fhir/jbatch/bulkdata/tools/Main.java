@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2020
+ * (C) Copyright IBM Corp. 2020, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -114,7 +114,7 @@ public class Main {
      * (b) without numberOfTotalResources, then we go thought the COS/S3 once to get the total record number, then each
      * piece
      * will have (total-record-number/numberOfFiles) lines in it.
-     * 
+     *
      * @param args
      */
     public void parseArgs(String[] args) {
@@ -220,9 +220,7 @@ public class Main {
         return lineRed;
     }
 
-
-
-    private boolean writeFhirResourceFromBufferReader(BufferedReader resReader,  AmazonS3 cosClient, long numForSeg, boolean isSegBySize) throws Exception {
+    private boolean writeFhirResourceFromBufferReader(BufferedReader resReader, AmazonS3 cosClient, long numForSeg, boolean isSegBySize) throws Exception {
         int lineRed = 0;
         int segNum = 0;
         long segSize = 0;

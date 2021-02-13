@@ -32,6 +32,7 @@ import com.ibm.cloud.objectstorage.services.s3.model.PartETag;
 import com.ibm.fhir.config.FHIRConfigHelper;
 import com.ibm.fhir.config.FHIRConfiguration;
 import com.ibm.fhir.config.FHIRRequestContext;
+import com.ibm.fhir.jbatch.bulkdata.audit.BulkAuditLogger;
 import com.ibm.fhir.jbatch.bulkdata.common.BulkDataUtils;
 import com.ibm.fhir.jbatch.bulkdata.common.Constants;
 import com.ibm.fhir.model.resource.Resource;
@@ -74,6 +75,8 @@ public class ResourcePayloadReader extends AbstractItemReader {
     private final static Logger logger = Logger.getLogger(ResourcePayloadReader.class.getName());
     private static final String CLASS = ResourcePayloadReader.class.getName();
 
+    private static final BulkAuditLogger AUDIT_LOGGER = new BulkAuditLogger();
+
     // S3 client API to IBM Cloud Object Storage
     private AmazonS3 cosClient = null;
 
@@ -103,7 +106,6 @@ public class ResourcePayloadReader extends AbstractItemReader {
     @Inject
     @BatchProperty(name = Constants.PARTITION_RESOURCE_TYPE)
     String fhirResourceType;
-
 
     /**
      * Should COS objects we create be publicly readable (no need for authentication)

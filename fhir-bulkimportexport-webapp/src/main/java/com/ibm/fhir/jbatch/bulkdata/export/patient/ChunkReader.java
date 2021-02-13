@@ -1,10 +1,24 @@
 /*
- * (C) Copyright IBM Corp. 2019, 2020
+ * (C) Copyright IBM Corp. 2019, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.ibm.fhir.jbatch.bulkdata.export.patient;
+
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.DEFAULT_FHIR_TENANT;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.DEFAULT_PATIENT_EXPORT_SEARCH_PAGE_SIZE;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_FORMAT;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_SEARCH_FROMDATE;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_SEARCH_PAGESIZE;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_SEARCH_TODATE;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_SEARCH_TYPEFILTERS;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.FHIR_DATASTORE_ID;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.FHIR_SEARCH_LASTUPDATED;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.FHIR_TENANT;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.INCOMING_URL;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.NDJSON_LINESEPERATOR;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.PARTITION_RESOURCE_TYPE;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -30,8 +44,8 @@ import com.ibm.fhir.config.FHIRConfigHelper;
 import com.ibm.fhir.config.FHIRConfiguration;
 import com.ibm.fhir.config.FHIRRequestContext;
 import com.ibm.fhir.core.FHIRMediaType;
+import com.ibm.fhir.jbatch.bulkdata.audit.BulkAuditLogger;
 import com.ibm.fhir.jbatch.bulkdata.common.BulkDataUtils;
-import com.ibm.fhir.jbatch.bulkdata.common.Constants;
 import com.ibm.fhir.jbatch.bulkdata.export.common.CheckPointUserData;
 import com.ibm.fhir.jbatch.bulkdata.export.common.TransientUserData;
 import com.ibm.fhir.model.format.Format;
@@ -50,12 +64,14 @@ import com.ibm.fhir.search.context.FHIRSearchContext;
 import com.ibm.fhir.search.util.SearchUtil;
 
 /**
- * Bulk patient export Chunk implementation - the Reader.
- *
+ * Bulk Data Patient Export Chunk Reader
  */
 @Dependent
 public class ChunkReader extends AbstractItemReader {
     private final static Logger logger = Logger.getLogger(ChunkReader.class.getName());
+
+    private static final BulkAuditLogger AUDIT_LOGGER = new BulkAuditLogger();
+
     protected int pageNum = 1;
     // Control the number of records to read in each "item".
     protected int pageSize;
@@ -75,60 +91,60 @@ public class ChunkReader extends AbstractItemReader {
      * FHIR tenant id.
      */
     @Inject
-    @BatchProperty(name = Constants.FHIR_TENANT)
+    @BatchProperty(name = FHIR_TENANT)
     protected String fhirTenant;
 
     /**
      * FHIR data store id.
      */
     @Inject
-    @BatchProperty(name = Constants.FHIR_DATASTORE_ID)
+    @BatchProperty(name = FHIR_DATASTORE_ID)
     protected String fhirDatastoreId;
 
     /**
      * FHIR resource type to process.
      */
     @Inject
-    @BatchProperty(name = Constants.PARTITION_RESOURCE_TYPE)
+    @BatchProperty(name = PARTITION_RESOURCE_TYPE)
     protected String fhirResourceType;
 
     /**
      * FHIR export format.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_FORMAT)
+    @BatchProperty(name = EXPORT_FHIR_FORMAT)
     protected String fhirExportFormat;
 
     /**
      * FHIR Search from date.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_SEARCH_FROMDATE)
+    @BatchProperty(name = EXPORT_FHIR_SEARCH_FROMDATE)
     String fhirSearchFromDate;
 
     /**
      * FHIR search to date.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_SEARCH_TODATE)
+    @BatchProperty(name = EXPORT_FHIR_SEARCH_TODATE)
     String fhirSearchToDate;
 
     /**
      * FHIR search page size.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_SEARCH_PAGESIZE)
+    @BatchProperty(name = EXPORT_FHIR_SEARCH_PAGESIZE)
     String fhirSearchPageSize;
 
     /**
      * FHIR export type filters.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_SEARCH_TYPEFILTERS)
+    @BatchProperty(name = EXPORT_FHIR_SEARCH_TYPEFILTERS)
     String fhirTypeFilters;
 
     @Inject
-    @BatchProperty(name = Constants.INCOMING_URL)
+    @BatchProperty(name = INCOMING_URL)
     String incomingUrl;
 
     @Inject
@@ -167,9 +183,9 @@ public class ChunkReader extends AbstractItemReader {
                 }
 
                 if (!searchCriteria.isEmpty()) {
-                    queryParameters.put(Constants.FHIR_SEARCH_LASTUPDATED, searchCriteria);
+                    queryParameters.put(FHIR_SEARCH_LASTUPDATED, searchCriteria);
                 }
-                queryParameters.put("_sort", Arrays.asList(Constants.FHIR_SEARCH_LASTUPDATED));
+                queryParameters.put("_sort", Arrays.asList(FHIR_SEARCH_LASTUPDATED));
 
                 List<String> compartmentSearchCriterias = CompartmentUtil.getCompartmentResourceTypeInclusionCriteria("Patient", resourceType.getSimpleName());
                 if (compartmentSearchCriterias.size() > 1) {
@@ -212,7 +228,7 @@ public class ChunkReader extends AbstractItemReader {
                                 // we don't need to control the Multi-part upload like in the NDJSON case
                                 if (!FHIRMediaType.APPLICATION_PARQUET.equals(fhirExportFormat)) {
                                     FHIRGenerator.generator(Format.JSON).generate(res, chunkData.getBufferStream());
-                                    chunkData.getBufferStream().write(Constants.NDJSON_LINESEPERATOR);
+                                    chunkData.getBufferStream().write(NDJSON_LINESEPERATOR);
                                 }
                                 resSubTotal++;
                                 if (isDoDuplicationCheck) {
@@ -263,7 +279,7 @@ public class ChunkReader extends AbstractItemReader {
                 // we don't need to control the Multi-part upload like in the NDJSON case
                 if (!FHIRMediaType.APPLICATION_PARQUET.equals(fhirExportFormat)) {
                     FHIRGenerator.generator(Format.JSON).generate(res, chunkData.getBufferStream());
-                    chunkData.getBufferStream().write(Constants.NDJSON_LINESEPERATOR);
+                    chunkData.getBufferStream().write(NDJSON_LINESEPERATOR);
                 }
                 resSubTotal++;
             } catch (FHIRGeneratorException e) {
@@ -318,10 +334,10 @@ public class ChunkReader extends AbstractItemReader {
         }
 
         if (!searchCreterial.isEmpty()) {
-            queryParameters.put(Constants.FHIR_SEARCH_LASTUPDATED, searchCreterial);
+            queryParameters.put(FHIR_SEARCH_LASTUPDATED, searchCreterial);
         }
 
-        queryParameters.put("_sort", Arrays.asList(Constants.FHIR_SEARCH_LASTUPDATED));
+        queryParameters.put("_sort", Arrays.asList(FHIR_SEARCH_LASTUPDATED));
         searchContext = SearchUtil.parseQueryParameters(Patient.class, queryParameters);
         searchContext.setPageSize(pageSize);
         searchContext.setPageNumber(pageNum);
@@ -384,11 +400,11 @@ public class ChunkReader extends AbstractItemReader {
         }
 
         if (fhirTenant == null) {
-            fhirTenant = Constants.DEFAULT_FHIR_TENANT;
+            fhirTenant = DEFAULT_FHIR_TENANT;
             logger.fine("open: Set tenant to default!");
         }
         if (fhirDatastoreId == null) {
-            fhirDatastoreId = Constants.DEFAULT_FHIR_TENANT;
+            fhirDatastoreId = DEFAULT_FHIR_TENANT;
             logger.fine("open: Set DatastoreId to default!");
         }
 
@@ -398,7 +414,7 @@ public class ChunkReader extends AbstractItemReader {
         searchParametersForResoureTypes = BulkDataUtils.getSearchParemetersFromTypeFilters(fhirTypeFilters);
 
         resourceType = ModelSupport.getResourceType(fhirResourceType);
-        pageSize = FHIRConfigHelper.getIntProperty(FHIRConfiguration.PROPERTY_BULKDATA_PATIENTEXPORT_PAGESIZE, Constants.DEFAULT_PATIENT_EXPORT_SEARCH_PAGE_SIZE);
+        pageSize = FHIRConfigHelper.getIntProperty(FHIRConfiguration.PROPERTY_BULKDATA_PATIENTEXPORT_PAGESIZE, DEFAULT_PATIENT_EXPORT_SEARCH_PAGE_SIZE);
         if (fhirSearchPageSize != null) {
             try {
                 pageSize = Integer.parseInt(fhirSearchPageSize);

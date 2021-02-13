@@ -81,7 +81,7 @@ public class SparkParquetWriter implements AutoCloseable {
      */
     public void writeParquet(List<Resource> resources, String outDirName)
             throws FHIRGeneratorException {
-        List<String> jsonResources = new ArrayList<String>();
+        List<String> jsonResources = new ArrayList<>();
 
         FHIRGenerator generator = FHIRGenerator.generator(Format.JSON);
         for (Resource singleResource : resources) {

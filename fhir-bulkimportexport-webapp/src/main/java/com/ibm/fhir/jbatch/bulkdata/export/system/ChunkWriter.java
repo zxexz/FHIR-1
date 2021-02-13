@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2019, 2020
+ * (C) Copyright IBM Corp. 2019, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -113,23 +113,20 @@ public class ChunkWriter extends AbstractItemWriter {
     @Inject
     JobContext jobContext;
 
-    /**
-     * @see javax.batch.api.chunk.AbstractItemWriter#AbstractItemWriter()
-     */
     public ChunkWriter() {
         super();
     }
 
     private void pushFhirJsonsToCos(InputStream in, int dataLength) throws Exception {
         if (cosClient == null) {
-            logger.warning("pushFhirJsons2Cos: no cosClient!");
-            throw new Exception("pushFhirJsons2Cos: no cosClient!");
+            logger.warning("pushFhirJsonsToCos: no cosClient!");
+            throw new Exception("pushFhirJsonsToCos: no cosClient!");
         }
 
         TransientUserData chunkData = (TransientUserData) stepCtx.getTransientUserData();
         if (chunkData == null) {
-            logger.warning("pushFhirJsons2Cos: chunkData is null, this should never happen!");
-            throw new Exception("pushFhirJsons2Cos: chunkData is null, this should never happen!");
+            logger.warning("pushFhirJsonsToCos: chunkData is null, this should never happen!");
+            throw new Exception("pushFhirJsonsToCos: chunkData is null, this should never happen!");
         }
 
         String itemName;
@@ -145,7 +142,7 @@ public class ChunkWriter extends AbstractItemWriter {
 
         chunkData.getCosDataPacks().add(BulkDataUtils.multiPartUpload(cosClient, cosBucketName, itemName,
                 chunkData.getUploadId(), in, dataLength, chunkData.getPartNum()));
-        logger.info("pushFhirJsons2Cos: " + dataLength + " bytes were successfully appended to COS object - "
+        logger.info("pushFhirJsonsToCos: " + dataLength + " bytes were successfully appended to COS object - "
                 + itemName);
         chunkData.setPartNum(chunkData.getPartNum() + 1);
         chunkData.getBufferStream().reset();
@@ -218,9 +215,6 @@ public class ChunkWriter extends AbstractItemWriter {
         }
     }
 
-    /**
-     * @see {@link javax.batch.api.chunk.AbstractItemWriter#writeItems(List)}
-     */
     @Override
     public void writeItems(List<java.lang.Object> resourceLists) throws Exception {
         if (cosBucketName == null) {

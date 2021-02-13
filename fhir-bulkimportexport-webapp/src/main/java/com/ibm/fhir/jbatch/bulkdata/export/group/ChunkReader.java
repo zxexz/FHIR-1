@@ -6,6 +6,8 @@
 
 package com.ibm.fhir.jbatch.bulkdata.export.group;
 
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_FHIR_SEARCH_PATIENTGROUPID;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +25,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.ibm.cloud.objectstorage.services.s3.model.PartETag;
-import com.ibm.fhir.jbatch.bulkdata.common.Constants;
+import com.ibm.fhir.jbatch.bulkdata.audit.BulkAuditLogger;
 import com.ibm.fhir.jbatch.bulkdata.export.common.TransientUserData;
 import com.ibm.fhir.model.resource.Group;
 import com.ibm.fhir.model.resource.Group.Member;
@@ -36,11 +38,14 @@ import com.ibm.fhir.search.context.FHIRSearchContext;
 import com.ibm.fhir.search.util.SearchUtil;
 
 /**
- * Bulk patient group export Chunk implementation - the Reader.
+ * Bulk Data Group Export Chunk Reader
  */
 @Dependent
 public class ChunkReader extends com.ibm.fhir.jbatch.bulkdata.export.patient.ChunkReader {
-    private final static Logger logger = Logger.getLogger(ChunkReader.class.getName());
+    private static final Logger logger = Logger.getLogger(ChunkReader.class.getName());
+
+    private static final BulkAuditLogger AUDIT_LOGGER = new BulkAuditLogger();
+
     // List for the patients
     List<Member> patientMembers = null;
 
@@ -48,7 +53,7 @@ public class ChunkReader extends com.ibm.fhir.jbatch.bulkdata.export.patient.Chu
      * FHIR search patient group id.
      */
     @Inject
-    @BatchProperty(name = Constants.EXPORT_FHIR_SEARCH_PATIENTGROUPID)
+    @BatchProperty(name = EXPORT_FHIR_SEARCH_PATIENTGROUPID)
     String fhirSearchPatientGroupId;
 
     @Inject

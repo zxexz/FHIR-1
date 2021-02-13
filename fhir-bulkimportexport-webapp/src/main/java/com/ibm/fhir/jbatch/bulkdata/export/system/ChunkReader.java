@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2019, 2020
+ * (C) Copyright IBM Corp. 2019, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import com.ibm.cloud.objectstorage.services.s3.model.PartETag;
 import com.ibm.fhir.config.FHIRRequestContext;
 import com.ibm.fhir.core.FHIRMediaType;
+import com.ibm.fhir.jbatch.bulkdata.audit.BulkAuditLogger;
 import com.ibm.fhir.jbatch.bulkdata.common.BulkDataUtils;
 import com.ibm.fhir.jbatch.bulkdata.common.Constants;
 import com.ibm.fhir.jbatch.bulkdata.export.common.CheckPointUserData;
@@ -50,6 +51,9 @@ import com.ibm.fhir.search.util.SearchUtil;
 @Dependent
 public class ChunkReader extends AbstractItemReader {
     private final static Logger logger = Logger.getLogger(ChunkReader.class.getName());
+
+    private static final BulkAuditLogger AUDIT_LOGGER = new BulkAuditLogger();
+
     boolean isSingleCosObject = false;
     int pageNum = 1;
     // Control the number of records to read in each "item".

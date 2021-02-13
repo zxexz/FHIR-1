@@ -1,4 +1,5 @@
 /*
+
  * (C) Copyright IBM Corp. 2019, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -12,6 +13,11 @@ package com.ibm.fhir.jbatch.bulkdata.common;
 public class Constants {
     public static final String DEFAULT_FHIR_TENANT = "default";
     public static final String DEFAULT_COS_BUCKETNAME = "fhir-bulkImExport-Connectathon";
+
+    /**
+     * The source
+     */
+    public static final String SOURCE = "source";
 
     /**
      * The minimal size (10MiB) for COS multiple-parts upload (NDJSON-only).

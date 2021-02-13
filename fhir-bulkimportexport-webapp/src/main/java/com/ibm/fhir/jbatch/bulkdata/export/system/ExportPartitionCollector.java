@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2020
+ * (C) Copyright IBM Corp. 2020, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -40,13 +40,11 @@ public class ExportPartitionCollector implements PartitionCollector {
         // If the job is being stopped or in other status except for "started", or if there is more page to process, then collect nothing.
         if (!batchStatus.equals(BatchStatus.STARTED)
             || transientUserData.isMoreToExport()
-            || transientUserData.getResourceTypeSummary() == null)
-        {
+            || transientUserData.getResourceTypeSummary() == null) {
             return null;
         }
 
         CheckPointUserData partitionSummary = CheckPointUserData.fromTransientUserData(transientUserData);
         return partitionSummary;
     }
-
 }

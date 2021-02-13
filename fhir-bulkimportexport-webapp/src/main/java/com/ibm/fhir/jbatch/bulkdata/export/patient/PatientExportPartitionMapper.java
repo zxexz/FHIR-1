@@ -1,10 +1,14 @@
 /*
- * (C) Copyright IBM Corp. 2020
+ * (C) Copyright IBM Corp. 2020, 2021
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.ibm.fhir.jbatch.bulkdata.export.patient;
+
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.EXPORT_MAX_PARTITIONPROCESSING_THREADNUMBER;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.FHIR_RESOURCETYPES;
+import static com.ibm.fhir.jbatch.bulkdata.common.Constants.PARTITION_RESOURCE_TYPE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,19 +22,14 @@ import javax.batch.api.partition.PartitionPlanImpl;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.ibm.fhir.jbatch.bulkdata.common.Constants;
 import com.ibm.fhir.search.compartment.CompartmentUtil;
 
 @Dependent
 public class PatientExportPartitionMapper implements PartitionMapper {
 
-    /**
-     * Fhir ResourceType.
-     */
     @Inject
-    @BatchProperty(name = Constants.FHIR_RESOURCETYPES)
+    @BatchProperty(name = FHIR_RESOURCETYPES)
     String fhirResourceType;
-
 
     public PatientExportPartitionMapper() {
         // No Operation
@@ -52,13 +51,13 @@ public class PatientExportPartitionMapper implements PartitionMapper {
 
         PartitionPlanImpl pp = new PartitionPlanImpl();
         pp.setPartitions(resourceTypes.size());
-        pp.setThreads(Math.min(Constants.EXPORT_MAX_PARTITIONPROCESSING_THREADNUMBER, resourceTypes.size()));
+        pp.setThreads(Math.min(EXPORT_MAX_PARTITIONPROCESSING_THREADNUMBER, resourceTypes.size()));
         Properties[] partitionProps = new Properties[resourceTypes.size()];
 
         int propCount = 0;
         for (String resourceType : resourceTypes) {
             Properties p = new Properties();
-            p.setProperty(Constants.PARTITION_RESOURCE_TYPE, resourceType);
+            p.setProperty(PARTITION_RESOURCE_TYPE, resourceType);
             partitionProps[propCount++] = p;
         }
         pp.setPartitionProperties(partitionProps);

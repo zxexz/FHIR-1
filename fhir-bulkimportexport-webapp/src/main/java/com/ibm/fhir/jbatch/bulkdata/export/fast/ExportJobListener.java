@@ -23,8 +23,8 @@ public class ExportJobListener implements JobListener {
     JobContext jobContext;
 
     public ExportJobListener() {
+        // No Operation
     }
-
 
     @Override
     public void afterJob() {
