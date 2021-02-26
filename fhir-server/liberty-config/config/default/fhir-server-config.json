@@ -108,6 +108,7 @@
             },
             "datasources": {
                 "default": {
+                    "jndiName": "jdbc/bootstrap_default_default",
                     "type": "derby"
                 },
                 "_db2sample": {

@@ -360,7 +360,7 @@ To use the proxy datasource:
     }
     ```
 
-    The `connectionProperties` property is a set of driver-specific properties needed to connect to an instance of that database type. For a Db2-related datasource definition, any bean property supported by the `DB2XADataSource` class can be specified within the `connectionProperties` property group. For a discussion of the specific properties that can be used to configure a `DB2XADataSource` instance, see the [Db2 Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.apdv.java.doc/src/tpc/imjcc_rjvdsprp.html).
+    The `connectionProperties` property is a set of driver-specific properties needed to connect to an instance of that database type. For a Db2, any datasource property supported by the `DB2XADataSource` class can be specified within the `connectionProperties` property group. For a discussion of the specific properties that can be used to configure a `DB2XADataSource` instance, see the [Db2 Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.apdv.java.doc/src/tpc/imjcc_rjvdsprp.html).
 
     For a Derby-related datasource definition, any bean property supported by the `EmbeddedXADataSource` class can be specified within the `connectionProperties` property group. For more information about the properties supported by the `EmbeddedXADataSource` class, and its super classes, see the [Apache Derby documentation](https://db.apache.org/derby/docs/10.13/publishedapi/org/apache/derby/jdbc/EmbeddedXADataSource.html).
 
@@ -371,9 +371,10 @@ The proxy datasource relies on the presence of the tenant-id and datastore-id in
 
 #### 3.3.1.3 Supported databases
 ##### 3.3.1.3.1 Embedded Derby (default)
-If you are using the `ibmcom/ibm-fhir-server` docker image, you can ask the entrypoint script to create (bootstrap) the database and the schema and tables during startup by setting the `DB_BOOTSTRAP` environment variable to `true`.
+If you are using the `ibmcom/ibm-fhir-server` docker image, you can ask the entrypoint script to create (bootstrap) the database and the schema and tables during startup by setting the `BOOTSTRAP_DB` environment variable to `true`.
 
 This database bootstrap step is only supported for Embedded Derby and will only bootstrap the default datastore of the default tenant (the default for requests with no tenant or datastore headers).
+Reminder:  the Embedded Derby support is designed to support simple getting started scenarios and is not recommended for production use.
 
 ```
 <server>
@@ -392,11 +393,11 @@ This database bootstrap step is only supported for Embedded Derby and will only 
 ##### 3.3.1.3.2 Db2
 If you configure the FHIR server to use an IBM Db2 database, you must:
 
-1. create the database if it doesn't already exist
+1. Create the database if it doesn't already exist.
 
-2. execute the `fhir-persistence-schema` utility to create the necessary schemas (tables, indices, stored procedures, etc) and tenants
+2. Execute the `fhir-persistence-schema` utility to create the necessary schemas (tables, indices, stored procedures, etc) and tenants.
 
-3. configure the IBM FHIR Server with the tenantKey generated in step number 2.
+3. Configure the IBM FHIR Server with the tenantKey generated in step number 2.
 
 An executable `fhir-persistence-schema` jar can be downloaded from the project's [Releases tab](https://github.com/IBM/FHIR/releases) and documentation can be found at https://github.com/IBM/FHIR/tree/main/fhir-persistence-schema.
 

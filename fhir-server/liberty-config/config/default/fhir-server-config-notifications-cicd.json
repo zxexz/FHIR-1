@@ -137,33 +137,14 @@
             },
             "jdbc": {
                 "__comment": "Configuration properties for the JDBC persistence implementation",
-<<<<<<< HEAD
-                "enableProxyDatasource": false,
-=======
->>>>>>> 16554f87ab... issue #1694 - make liberty datasources the default
                 "enableCodeSystemsCache": true,
                 "enableParameterNamesCache": true,
                 "enableResourceTypesCache": true
             },
             "datasources": {
                 "default": {
-<<<<<<< HEAD
-                    "type": "derby",
-                    "currentSchema": "APP"
-                },
-                "_db2sample": {
-                    "type": "db2",
-                    "currentSchema": "fhirdata",
-                    "hints": {
-                        "search.reopt": "ONCE"
-                    }
-                },
-                "_pgsample": {
-                    "type": "postgresql",
-                    "currentSchema": "fhirdata"
-=======
+                    "jndiName": "jdbc/bootstrap_default_default",
                     "type": "derby"
->>>>>>> 16554f87ab... issue #1694 - make liberty datasources the default
                 }
             }
         },
